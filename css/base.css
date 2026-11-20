@@ -1,0 +1,189 @@
+/* =========================================================
+   MISI BALOK — base.css
+   Variabel tema, reset, latar belakang, tipografi dasar
+   ========================================================= */
+:root {
+  --bg0: #070a18;
+  --bg1: #0e1330;
+  --bg2: #1a1446;
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-2: rgba(255, 255, 255, 0.1);
+  --border: rgba(255, 255, 255, 0.14);
+  --text: #eef1ff;
+  --muted: #a3acd6;
+  --faint: #6f79a8;
+
+  --primary: #8b6cff;
+  --primary-2: #6a4cf0;
+  --cyan: #22d3ee;
+  --pink: #ff5ca8;
+  --green: #34d399;
+  --amber: #fbbf24;
+  --rose: #fb7185;
+  --blue: #60a5fa;
+
+  /* warna pasangan sisi (konsisten di semua misi) */
+  --pair-tb: #3b82f6; /* alas & tutup */
+  --pair-fb: #10b981; /* depan & belakang */
+  --pair-lr: #f59e0b; /* kiri & kanan */
+
+  --radius: 20px;
+  --radius-sm: 12px;
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.38);
+
+  --font-head: "Baloo 2", "Fredoka", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text);
+  line-height: 1.55;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(1100px 700px at 12% -10%, #3a24a066, transparent 60%),
+    radial-gradient(900px 650px at 105% 8%, #0e749055, transparent 55%),
+    linear-gradient(160deg, var(--bg0), var(--bg1) 50%, var(--bg2));
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-head);
+  line-height: 1.2;
+  letter-spacing: 0.2px;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: 0;
+  background: none;
+}
+
+input {
+  font: inherit;
+  color: inherit;
+}
+
+.hidden {
+  display: none !important;
+}
+
+::selection {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* scrollbar tipis */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 99px;
+}
+
+/* ---------- Latar: kubus melayang ---------- */
+.bg-cubes {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.bg-cube {
+  position: absolute;
+  bottom: -80px;
+  border: 1.5px solid rgba(139, 108, 255, 0.35);
+  background: linear-gradient(135deg, rgba(139, 108, 255, 0.14), rgba(34, 211, 238, 0.06));
+  border-radius: 8px;
+  animation: floatUp var(--d, 22s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes floatUp {
+  from {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-120vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* ---------- Layout ---------- */
+.app {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.container {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  flex: 1;
+}
+.view {
+  animation: viewIn 0.4s ease both;
+}
+@keyframes viewIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--border);
+  background: rgba(7, 10, 24, 0.6);
+  backdrop-filter: blur(8px);
+  padding: 14px 16px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

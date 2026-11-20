@@ -1,0 +1,12 @@
+{
+  "name": "misi-balok",
+  "version": "1.1.0",
+  "description": "Media belajar interaktif geometri balok untuk SMP kelas VIII",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

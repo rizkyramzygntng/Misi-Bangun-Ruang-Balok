@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0e1330" />
+    <title>MISI BALOK — Belajar Geometri Ruang Interaktif</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+
+    <!-- Font & ikon -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Gaya (dipisah per tugas) -->
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages.css" />
+    <link rel="stylesheet" href="css/tutor.css" />
+  </head>
+
+  <body>
+    <div class="bg-cubes" id="bgCubes" aria-hidden="true"></div>
+
+    <!-- ================= LAYAR LOGIN ================= -->
+    <div id="authScreen" class="auth">
+      <div class="auth__card card">
+        <div class="auth__brand">
+          <div class="logo"><i class="fa-solid fa-cube"></i></div>
+          <div>
+            <h1>MISI BALOK</h1>
+            <p>Petualangan Geometri 3D · Matematika SMP Kelas VIII</p>
+          </div>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab is-active" id="tabLogin" data-action="authTab" data-arg="login" type="button">Masuk</button>
+          <button class="tab" id="tabRegister" data-action="authTab" data-arg="register" type="button">Daftar</button>
+        </div>
+
+        <form id="authForm" class="stack" novalidate>
+          <label class="field">
+            <span>Nama pengguna</span>
+            <input id="authName" class="input" type="text" maxlength="20" autocomplete="username" placeholder="contoh: budi_08" />
+          </label>
+          <label class="field">
+            <span>Kata sandi</span>
+            <div class="input-wrap">
+              <input id="authPass" class="input" type="password" autocomplete="current-password" placeholder="minimal 4 karakter" />
+              <button class="eye" type="button" data-action="togglePass" aria-label="Lihat kata sandi">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </label>
+          <label class="field hidden" id="authPass2Wrap">
+            <span>Ulangi kata sandi</span>
+            <input id="authPass2" class="input" type="password" autocomplete="new-password" placeholder="ketik ulang kata sandi" />
+          </label>
+          <div id="authError" class="feedback bad hidden" role="alert"></div>
+          <button id="authSubmit" class="btn btn--primary btn--lg btn--block" type="submit">Masuk</button>
+        </form>
+
+        <div class="divider"><span>atau</span></div>
+        <button class="btn btn--ghost btn--block" data-action="guestLogin" type="button">
+          <i class="fa-solid fa-user-secret"></i> Main sebagai Tamu <small>(progres tidak tersimpan)</small>
+        </button>
+        <p class="auth__note">
+          <i class="fa-solid fa-circle-info"></i> Akun &amp; progres disimpan di browser perangkat ini.
+        </p>
+      </div>
+    </div>
+
+    <!-- ================= APLIKASI ================= -->
+    <div id="app" class="app hidden">
+      <header class="topbar">
+        <div class="topbar__inner">
+          <button class="brand" data-nav="hub" type="button">
+            <span class="logo"><i class="fa-solid fa-cube"></i></span>
+            <span>
+              <h1 style="font-size:1.15rem">MISI BALOK</h1>
+              <span>Matematika SMP Kelas VIII</span>
+            </span>
+          </button>
+
+          <div class="topbar__right">
+            <div class="progress-mini">
+              <span>Progres Belajar</span>
+              <div class="bar"><i id="topProgressBar"></i></div>
+            </div>
+            <div class="pill pill--gold"><i class="fa-solid fa-trophy"></i><span id="topScore">0 Poin</span></div>
+            <div class="user-menu">
+              <button id="musicBtn" class="icon-btn is-on" data-action="toggleMusicPanel" title="Musik & suara" type="button">
+                <i class="fa-solid fa-music"></i>
+              </button>
+              <div id="musicPanel" class="menu menu--wide hidden">
+                <div class="menu__note">Pilih lagu latar belajar</div>
+                <div id="trackList" class="tracks"></div>
+                <div class="menu__row">
+                  <span>Volume</span>
+                  <input id="volumeSlider" type="range" min="0" max="100" value="50" />
+                </div>
+                <button class="menu__item" data-action="toggleMusic" type="button">
+                  <i class="fa-solid fa-music"></i> Musik: <b id="musicState">Hidup</b>
+                </button>
+                <button class="menu__item" data-action="toggleSfx" type="button">
+                  <i class="fa-solid fa-bell"></i> Efek suara: <b id="sfxState">Hidup</b>
+                </button>
+              </div>
+            </div>
+            <button class="icon-btn" data-action="openLeaderboard" title="Papan peringkat" type="button">
+              <i class="fa-solid fa-ranking-star"></i>
+            </button>
+            <div class="user-menu">
+              <button class="user-chip" data-action="toggleUserMenu" type="button">
+                <span class="avatar" id="userAvatar">?</span>
+                <span id="userName">Tamu</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </button>
+              <div id="userMenu" class="menu hidden">
+                <div class="menu__note" id="userModeNote"></div>
+                <button class="menu__item" data-action="resetProgress" type="button">
+                  <i class="fa-solid fa-rotate-left"></i> Reset progres
+                </button>
+                <button class="menu__item menu__item--danger" data-action="logout" type="button">
+                  <i class="fa-solid fa-right-from-bracket"></i> Keluar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="container">
+        <!-- ============ HUB ============ -->
+        <section id="view-hub" class="view">
+          <div class="hero card">
+            <div class="hero__text">
+              <span class="eyebrow">🚀 Petualangan Geometri 3D</span>
+              <h2>Halo, <em id="heroName">Penjelajah</em>!<br />Kenali bentuknya. Pahami ukurannya. Selesaikan misinya!</h2>
+              <p>
+                Bukan sekadar menghafal rumus. Putar balok 3D, bongkar jaring-jaringnya, otak-atik ukurannya, lalu
+                taklukkan tantangan soal cerita.
+              </p>
+              <div class="hero__cta">
+                <button class="btn btn--gold btn--lg" data-action="continue" type="button">
+                  🚀 <span id="continueLabel">Mulai Misi 1</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                <button id="resultsBtn" class="btn btn--ghost hidden" data-nav="results" type="button">
+                  <i class="fa-solid fa-award"></i> Lihat Hasil Terakhir
+                </button>
+              </div>
+            </div>
+
+            <div class="cube3d" aria-hidden="true">
+              <div class="cube3d__box">
+                <span class="f front"></span><span class="f back"></span>
+                <span class="f left"></span><span class="f right"></span>
+                <span class="f top"></span><span class="f bottom"></span>
+              </div>
+            </div>
+
+            <div class="hero__status">
+              <div class="hero__count">
+                <b><span id="hubDone">0</span>/5</b>
+                <div>
+                  <strong>Status Ekspedisi Balok</strong>
+                  <span id="hubDesc">Belum ada misi yang selesai. Yuk mulai Misi 1!</span>
+                </div>
+              </div>
+              <div class="bar"><i id="hubBar"></i></div>
+            </div>
+          </div>
+
+          <div class="section-title">
+            <h3><i class="fa-solid fa-map-location-dot"></i> Peta Misi Pembelajaran</h3>
+            <span>Selesaikan kelima misi untuk membuka Boss Level</span>
+          </div>
+          <div class="mgrid" id="missionGrid"></div>
+
+          <!-- Boss -->
+          <div
+            id="bossCard"
+            class="boss-card is-locked"
+            role="button"
+            tabindex="0"
+            data-nav="boss"
+          >
+            <div class="boss-card__main">
+              <div class="boss-card__icon"><i id="bossIcon" class="fa-solid fa-lock"></i></div>
+              <div>
+                <div class="boss-card__tags">
+                  <span class="boss-card__tag">Ujian Penentu</span>
+                  <span class="boss-card__lock" id="bossLockText"></span>
+                </div>
+                <h3>BOSS LEVEL: MASTER BALOK</h3>
+                <p>
+                  5 tantangan terpadu dengan 3 nyawa (❤️). Tiap jawaban salah memotong poin level itu. Buktikan kamu menguasai seluruh konsep balok kelas VIII!
+                </p>
+                <div class="boss-pips" id="bossPips"><i></i><i></i><i></i><i></i><i></i></div>
+              </div>
+            </div>
+            <button id="bossBtn" class="btn btn--gold btn--lg" type="button" tabindex="-1">Tantang Boss</button>
+          </div>
+        </section>
+
+        <!-- ============ MISI 1 ============ -->
+        <section id="view-misi1" class="view hidden" style="--mc: var(--primary)">
+          <div class="view__head">
+            <div>
+              <button class="back" data-nav="hub" type="button"><i class="fa-solid fa-chevron-left"></i> Kembali ke Menu</button>
+              <h2 class="view__title">Misi 1: Kenali Balok</h2>
+              <p class="view__sub">Putar balok 3D dengan jari/kursor, lalu pilih komponen yang ingin dipelajari.</p>
+            </div>
+            <span class="tag"><i class="fa-solid fa-hand-pointer"></i> Seret balok 3D</span>
+          </div>
+
+          <div class="lab">
+            <div class="card lab__stage">
+              <div class="stage-head"><span><i class="fa-solid fa-cube"></i>Kanvas Tiga Dimensi</span></div>
+              <div id="canvas-misi1" class="canvas-box"></div>
+              <div class="hint-line">
+                <span><i class="fa-solid fa-arrows-up-down-left-right"></i>Geser untuk memutar</span>
+                <span><i class="fa-solid fa-magnifying-glass-plus"></i>Tombol +/− untuk zoom</span>
+              </div>
+            </div>
+
+            <div class="lab__panel card">
+              <h3 class="panel-title">Pilih komponen balok</h3>
+              <div class="seg">
+                <button class="seg__btn is-active" id="m1-sisi" style="--c: var(--pair-tb)" data-action="m1Highlight" data-arg="sisi" type="button">
+                  <span class="seg__num">6</span> Sisi
+                </button>
+                <button class="seg__btn" id="m1-rusuk" style="--c: var(--green)" data-action="m1Highlight" data-arg="rusuk" type="button">
+                  <span class="seg__num">12</span> Rusuk
+                </button>
+                <button class="seg__btn" id="m1-sudut" style="--c: var(--amber)" data-action="m1Highlight" data-arg="sudut" type="button">
+                  <span class="seg__num">8</span> Titik Sudut
+                </button>
+                <button class="seg__btn" id="m1-diagonal" style="--c: var(--rose)" data-action="m1Highlight" data-arg="diagonal" type="button">
+                  <span class="seg__num">4</span> Diagonal Ruang
+                </button>
+              </div>
+
+              <div class="info-card">
+                <h4><i id="m1Icon" class="fa-solid fa-shapes"></i><span id="m1Title">SISI BALOK</span></h4>
+                <p id="m1Desc"></p>
+                <div class="info-card__extra" id="m1Extra"></div>
+              </div>
+
+              <div class="quiz-card">
+                <span class="quiz-card__label"><i class="fa-solid fa-circle-question"></i> Cek pemahaman cepat</span>
+                <p>Ada berapa banyak <strong>rusuk</strong> yang dimiliki sebuah balok?</p>
+                <div class="choices choices--3">
+                  <button class="choice" data-action="m1Quiz" data-arg="6" type="button">6</button>
+                  <button class="choice" data-action="m1Quiz" data-arg="8" type="button">8</button>
+                  <button class="choice" data-action="m1Quiz" data-arg="12" type="button">12</button>
+                </div>
+                <div id="m1Feedback" class="feedback hidden"></div>
+              </div>
+              <button id="m1Next" class="btn btn--primary btn--block hidden" data-nav="misi2" type="button">
+                Lanjut ke Misi 2 <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ MISI 2 ============ -->
+        <section id="view-misi2" class="view hidden" style="--mc: #a78bfa">
+          <div class="view__head">
+            <div>
+              <button class="back" data-nav="hub" type="button"><i class="fa-solid fa-chevron-left"></i> Kembali ke Menu</button>
+              <h2 class="view__title">Misi 2: Bongkar Balok</h2>
+              <p class="view__sub">Buka balok menjadi jaring-jaring 2D. Perhatikan: sisi yang berhadapan selalu berwarna sama!</p>
+            </div>
+          </div>
+
+          <div class="lab">
+            <div class="card lab__stage">
+              <div class="stage-head">
+                <span><i class="fa-solid fa-box-open"></i>Simulasi Buka–Lipat</span>
+                <b id="unfoldPct">0% Terbuka</b>
+              </div>
+              <div id="canvas-misi2" class="canvas-box"></div>
+              <div style="padding: 0 6px" class="stack">
+                <div class="slider-label"><span>Balok tertutup (3D)</span><span>Jaring-jaring datar (2D)</span></div>
+                <input id="unfoldSlider" type="range" min="0" max="100" value="0" />
+                <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap">
+                  <button class="btn btn--ghost btn--sm" data-action="setUnfold" data-arg="0" type="button">Tutup</button>
+                  <button class="btn btn--ghost btn--sm" data-action="setUnfold" data-arg="50" type="button">Setengah</button>
+                  <button class="btn btn--primary btn--sm" data-action="setUnfold" data-arg="100" type="button">Buka penuh</button>
+                </div>
+                <div class="legend">
+                  <span><i style="background: var(--pair-tb)"></i>Alas &amp; tutup</span>
+                  <span><i style="background: var(--pair-fb)"></i>Depan &amp; belakang</span>
+                  <span><i style="background: var(--pair-lr)"></i>Kiri &amp; kanan</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="lab__panel card">
+              <div>
+                <span class="quiz-card__label">Teka-teki visual</span>
+                <h3 style="margin-top: 4px">Mana yang bisa dilipat menjadi balok?</h3>
+                <p class="lead" style="margin-top: 4px">
+                  Bayangkan melipatnya. Sisi yang berhadapan harus sama ukuran, dan tidak boleh ada sisi yang menumpuk.
+                </p>
+              </div>
+              <div id="netOptions" class="stack"></div>
+              <div id="netFeedback" class="feedback hidden"></div>
+              <button id="m2Next" class="btn btn--primary btn--block hidden" data-nav="misi3" type="button">
+                Lanjut ke Misi 3 <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ MISI 3 ============ -->
+        <section id="view-misi3" class="view hidden" style="--mc: var(--blue)">
+          <div class="view__head">
+            <div>
+              <button class="back" data-nav="hub" type="button"><i class="fa-solid fa-chevron-left"></i> Kembali ke Menu</button>
+              <h2 class="view__title">Misi 3: Math Lab Volume</h2>
+              <p class="view__sub">Ubah panjang, lebar, tinggi, lalu lihat berapa banyak kubus satuan yang mengisi balok.</p>
+            </div>
+            <span class="tag">V = p × l × t</span>
+          </div>
+
+          <div class="lab">
+            <div class="card lab__stage">
+              <div class="stage-head">
+                <span><i class="fa-solid fa-vector-square"></i>Balok Dinamis</span>
+                <b id="dimensionTag">8 × 5 × 4 cm</b>
+              </div>
+              <div id="canvas-misi3" class="canvas-box"></div>
+              <label class="toggle" style="justify-content: center">
+                <input type="checkbox" id="unitToggle" checked /> Tampilkan kubus satuan (1 cm³)
+              </label>
+              <div class="sliders">
+                <div>
+                  <div class="slider-label"><span>Panjang (p)</span><b id="label-p">8 cm</b></div>
+                  <input type="range" id="slider-p" min="3" max="12" value="8" />
+                </div>
+                <div>
+                  <div class="slider-label"><span>Lebar (l)</span><b id="label-l">5 cm</b></div>
+                  <input type="range" id="slider-l" min="2" max="10" value="5" />
+                </div>
+                <div>
+                  <div class="slider-label"><span>Tinggi (t)</span><b id="label-t">4 cm</b></div>
+                  <input type="range" id="slider-t" min="2" max="10" value="4" />
+                </div>
+              </div>
+            </div>
+
+            <div class="lab__panel card">
+              <h3>Proses perhitungan volume</h3>
+              <p class="lead">
+                Volume = banyaknya kubus satuan 1 cm³ yang memenuhi isi balok. Saat ini ada
+                <strong id="cubeCount" style="color: var(--cyan)">160</strong> kubus.
+              </p>
+              <div class="calc">
+                <div class="calc__step"><span>Langkah 1: Rumus umum</span><p>V = p × l × t</p></div>
+                <div class="calc__step is-blue"><span>Langkah 2: Substitusi ukuran</span><p id="volSub">V = 8 × 5 × 4</p></div>
+                <div class="calc__step is-green"><span>Langkah 3: Hasil akhir</span><p id="volFinal">V = 160 cm³</p></div>
+              </div>
+
+              <div class="stack" style="border-top: 1px solid var(--border); padding-top: 14px">
+                <h4 class="panel-title">Coba latihan mandiri</h4>
+                <p class="lead">Sebuah wadah balok berukuran <strong>p = 10 cm, l = 6 cm, t = 5 cm</strong>. Berapa volumenya?</p>
+                <div class="input-row">
+                  <input id="labInput" class="input" type="number" inputmode="numeric" placeholder="Masukkan angka..." />
+                  <button class="btn btn--primary" data-action="m3Check" type="button">Periksa</button>
+                </div>
+                <div id="labFeedback" class="feedback hidden"></div>
+              </div>
+              <button id="m3Next" class="btn btn--primary btn--block hidden" data-nav="misi4" type="button">
+                Lanjut ke Misi 4 <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ MISI 4 ============ -->
+        <section id="view-misi4" class="view hidden" style="--mc: var(--amber)">
+          <div class="view__head">
+            <div>
+              <button class="back" data-nav="hub" type="button"><i class="fa-solid fa-chevron-left"></i> Kembali ke Menu</button>
+              <h2 class="view__title">Misi 4: Bedah Luas Permukaan</h2>
+              <p class="view__sub">Kenapa rumusnya <strong>2(pl + pt + lt)</strong>? Bedah pasangan sisinya satu per satu.</p>
+            </div>
+          </div>
+
+          <div class="lab">
+            <div class="card lab__stage">
+              <div class="stage-head">
+                <span><i class="fa-solid fa-palette"></i>Sorotan pasangan sisi</span>
+                <b>Klik pasangan di kanan</b>
+              </div>
+              <div id="canvas-misi4" class="canvas-box"></div>
+              <div class="legend">
+                <span><i style="background: var(--pair-tb)"></i>Alas &amp; tutup (p × l)</span>
+                <span><i style="background: var(--pair-fb)"></i>Depan &amp; belakang (p × t)</span>
+                <span><i style="background: var(--pair-lr)"></i>Kiri &amp; kanan (l × t)</span>
+              </div>
+            </div>
+
+            <div class="lab__panel card">
+              <h3>Mengapa ada angka "2"?</h3>
+              <p class="lead">Balok dibentuk oleh 3 pasang persegi panjang yang saling berhadapan:</p>
+              <div class="stack" style="gap: 10px">
+                <button class="pair" style="--c: var(--pair-tb)" data-action="m4Pair" data-arg="topbottom" type="button">
+                  <span class="pair__lead"><span class="pair__x">2×</span><span><h5>Alas &amp; Tutup</h5><p>panjang (p) × lebar (l)</p></span></span>
+                  <code>2 × (p·l)</code>
+                </button>
+                <button class="pair" style="--c: var(--pair-fb)" data-action="m4Pair" data-arg="frontback" type="button">
+                  <span class="pair__lead"><span class="pair__x">2×</span><span><h5>Depan &amp; Belakang</h5><p>panjang (p) × tinggi (t)</p></span></span>
+                  <code>2 × (p·t)</code>
+                </button>
+                <button class="pair" style="--c: var(--pair-lr)" data-action="m4Pair" data-arg="sides" type="button">
+                  <span class="pair__lead"><span class="pair__x">2×</span><span><h5>Kiri &amp; Kanan</h5><p>lebar (l) × tinggi (t)</p></span></span>
+                  <code>2 × (l·t)</code>
+                </button>
+              </div>
+
+              <div class="formula-box">
+                <span>Rumus luas permukaan balok</span>
+                <p>L = 2(pl + pt + lt)</p>
+                <small>Hitung 3 luas berbeda, jumlahkan, lalu kalikan 2!</small>
+              </div>
+
+              <div class="stack" style="border-top: 1px solid var(--border); padding-top: 14px">
+                <h4 class="panel-title">Giliranmu menghitung</h4>
+                <p class="lead">Balok berukuran <strong>p = 6 cm, l = 4 cm, t = 3 cm</strong>. Berapa luas permukaannya?</p>
+                <div class="input-row">
+                  <input id="m4Input" class="input" type="number" inputmode="numeric" placeholder="Luas dalam cm²..." />
+                  <button class="btn btn--primary" data-action="m4Check" type="button">Periksa</button>
+                </div>
+                <div id="m4Feedback" class="feedback hidden"></div>
+              </div>
+              <button id="m4Next" class="btn btn--primary btn--block hidden" data-nav="misi5" type="button">
+                Lanjut ke Misi 5 <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ MISI 5 ============ -->
+        <section id="view-misi5" class="view hidden" style="--mc: var(--rose)">
+          <div class="view__head">
+            <div>
+              <button class="back" data-nav="hub" type="button"><i class="fa-solid fa-chevron-left"></i> Kembali ke Menu</button>
+              <h2 class="view__title">Misi 5: Diagonal Challenge</h2>
+              <p class="view__sub">Bedakan diagonal bidang dan diagonal ruang, lalu temukan panjangnya dengan Pythagoras bertahap.</p>
+            </div>
+          </div>
+
+          <div class="lab">
+            <div class="card lab__stage">
+              <div class="stage-head">
+                <span><i class="fa-solid fa-bolt"></i>Diagonal ruang 3D</span>
+                <b>p = 12 · l = 9 · t = 8</b>
+              </div>
+              <div id="canvas-misi5" class="canvas-box"></div>
+              <div class="legend">
+                <span><i style="background: var(--cyan)"></i>Diagonal bidang alas</span>
+                <span><i style="background: var(--amber)"></i>Rusuk tinggi (t)</span>
+                <span><i style="background: var(--rose)"></i>Diagonal ruang</span>
+              </div>
+            </div>
+
+            <div class="lab__panel card">
+              <div style="display: flex; justify-content: space-between; align-items: center">
+                <h3>Mencari diagonal ruang</h3>
+                <span id="m5Badge" class="step-badge">Langkah 1/3</span>
+              </div>
+
+              <div id="m5Step1" class="stack">
+                <p class="lead">
+                  Balok berukuran <strong>p = 12 cm, l = 9 cm, t = 8 cm</strong>. Mulai dari alas: segitiga siku-siku
+                  pertama dibentuk oleh p, l, dan diagonal alas.
+                </p>
+                <div class="calc__step" style="font-family: ui-monospace, Menlo, monospace">
+                  <p style="font-size: 0.85rem">d<sub>alas</sub> = √(12² + 9²) = √(144 + 81) = √225</p>
+                </div>
+                <p class="lead"><strong>Berapakah √225 ?</strong></p>
+                <div class="input-row">
+                  <input id="m5In1" class="input" type="number" inputmode="numeric" placeholder="Hasil akar..." />
+                  <button class="btn btn--primary" data-action="m5Check1" type="button">Cek</button>
+                </div>
+              </div>
+
+              <div id="m5Step2" class="stack hidden">
+                <p class="lead">
+                  Benar, diagonal alas = 15 cm. Segitiga siku-siku kedua dibentuk oleh <strong>diagonal alas (15)</strong>,
+                  <strong>tinggi t (8)</strong>, dan diagonal ruang.
+                </p>
+                <div class="calc__step" style="font-family: ui-monospace, Menlo, monospace">
+                  <p style="font-size: 0.85rem">d = √(15² + 8²) = √(225 + 64) = √289</p>
+                </div>
+                <p class="lead"><strong>Berapakah √289 ?</strong></p>
+                <div class="input-row">
+                  <input id="m5In2" class="input" type="number" inputmode="numeric" placeholder="Hasil akar..." />
+                  <button class="btn btn--primary" data-action="m5Check2" type="button">Cek</button>
+                </div>
+              </div>
+
+              <div id="m5Step3" class="stack hidden">
+                <p class="lead">
+                  Diagonal ruang = 17 cm. Supaya tidak perlu dua kali Pythagoras, ada <strong>rumus pintas</strong>.
+                  Mana yang benar?
+                </p>
+                <div id="m5Formulas" class="stack" style="gap: 8px"></div>
+              </div>
+
+              <div id="m5Feedback" class="feedback hidden"></div>
+
+              <div style="border-top: 1px solid var(--border); padding-top: 12px">
+                <button class="hint-btn" data-action="hint" data-arg="diagonal" type="button">
+                  <i class="fa-solid fa-lightbulb"></i><span>Butuh petunjuk bertingkat?</span>
+                </button>
+                <div id="hintsDiagonal" class="tier-hints"></div>
+              </div>
+
+              <button id="m5Next" class="btn btn--primary btn--block hidden" data-nav="story" type="button">
+                Lanjut ke Detektif Soal Cerita <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ DETEKTIF SOAL CERITA ============ -->
+        <section id="view-story" class="view hidden" style="--mc: var(--green)">
+          <div class="view__head">
+            <div>
+              <button class="back" data-nav="hub" type="button"><i class="fa-solid fa-chevron-left"></i> Kembali ke Menu</button>
+              <h2 class="view__title">Detektif Soal Cerita</h2>
+              <p class="view__sub">Tandai kata kunci penting agar tidak bingung memilih rumus.</p>
+            </div>
+            <span class="tag"><i class="fa-solid fa-highlighter"></i> Mode Stabilo</span>
+          </div>
+
+          <div class="card story-wrap">
+            <div class="stack" style="gap: 8px">
+              <div style="display: flex; justify-content: space-between; font-size: 0.74rem; font-weight: 800; text-transform: uppercase; color: var(--muted)">
+                <span>Teks soal (klik kata/angka yang penting)</span>
+                <span id="hlCount" style="color: var(--primary)">0 ditandai</span>
+              </div>
+              <div class="story-text">
+                Sebuah <span class="hl" data-action="toggleHl">kardus</span> memiliki
+                <span class="hl" data-action="toggleHl">panjang 20 cm</span>,
+                <span class="hl" data-action="toggleHl">lebar 12 cm</span>, dan
+                <span class="hl" data-action="toggleHl">tinggi 10 cm</span>. Kardus tersebut akan
+                <span class="hl" data-action="toggleHl">dilapisi kertas pada seluruh bagian luarnya</span>. Berapa
+                <span class="hl" data-action="toggleHl">luas kertas</span> yang diperlukan?
+              </div>
+              <p class="lead"><i class="fa-solid fa-circle-info" style="color: var(--primary)"></i> Tip: cari angka ukuran (p, l, t) dan kata penentu apakah ini luas atau volume.</p>
+            </div>
+
+            <div class="step-box">
+              <h4><i class="fa-solid fa-compass"></i> Tahap 1: Apa yang sebenarnya ditanyakan soal?</h4>
+              <div id="storyGoals" class="choices" style="grid-template-columns: repeat(auto-fit, minmax(170px, 1fr))"></div>
+              <div id="storyGoalFb" class="feedback hidden"></div>
+            </div>
+
+            <div id="storySolver" class="stack hidden" style="border-top: 1px solid var(--border); padding-top: 16px">
+              <h4 style="display: flex; gap: 9px; align-items: center">
+                <i class="fa-solid fa-square-check" style="color: var(--green)"></i> Tahap 2: Hitung kebutuhan kertas
+              </h4>
+              <div class="facts">
+                <div>p × l = 20 × 12 <b>240 cm²</b></div>
+                <div>p × t = 20 × 10 <b>200 cm²</b></div>
+                <div>l × t = 12 × 10 <b>120 cm²</b></div>
+              </div>
+              <div class="step-box" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.35)">
+                <p style="font-weight: 800; font-size: 0.86rem">L = 2 × (240 + 200 + 120) = 2 × 560 = ...</p>
+                <div class="input-row">
+                  <input id="storyInput" class="input" type="number" inputmode="numeric" placeholder="Ketik hasil akhir (cm²)..." />
+                  <button class="btn btn--success" data-action="storyCheck" type="button">Kirim</button>
+                </div>
+                <div id="storyFb" class="feedback hidden"></div>
+              </div>
+              <div>
+                <button class="hint-btn" data-action="hint" data-arg="story" type="button">
+                  <i class="fa-solid fa-lightbulb"></i><span>Butuh bantuan bertingkat?</span>
+                </button>
+                <div id="hintsStory" class="tier-hints"></div>
+              </div>
+              <button id="storyNext" class="btn btn--primary btn--block hidden" data-nav="hub" type="button">
+                Kembali ke Peta Misi <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ BOSS ============ -->
+        <section id="view-boss" class="view hidden">
+          <div class="arena">
+            <div class="arena__head">
+              <div class="arena__title">
+                <div class="icon"><i class="fa-solid fa-dragon"></i></div>
+                <div>
+                  <small>Ujian akhir</small>
+                  <h3>BOSS LEVEL: MASTER BALOK</h3>
+                </div>
+              </div>
+              <div class="arena__stats">
+                <div class="hearts" id="bossHearts">
+                  <i class="fa-solid fa-heart"></i><i class="fa-solid fa-heart"></i><i class="fa-solid fa-heart"></i>
+                </div>
+                <span class="pill">Level <b id="bossStage" style="margin: 0 3px">1</b>/5</span>
+              </div>
+            </div>
+
+            <div class="hp">
+              <div class="hp__row"><span>Darah Boss: Golem Balok</span><span id="bossHpPct">100%</span></div>
+              <div class="bar"><i id="bossHpBar" style="width: 100%"></i></div>
+            </div>
+
+            <div class="boss-q">
+              <div class="boss-q__top">
+                <span class="boss-q__cat" id="bossCat"></span>
+                <button class="btn btn--sm btn--ghost" style="color: #fcd34d" data-action="bossHint" type="button">
+                  <i class="fa-solid fa-lightbulb"></i> Petunjuk (<span id="bossHintCount">2</span> sisa)
+                </button>
+              </div>
+              <h4 id="bossQuestion"></h4>
+              <div id="bossChoices" class="boss-choices"></div>
+              <div id="bossHintMsg" class="boss-hint hidden"></div>
+            </div>
+
+            <div class="arena__foot">
+              <button data-nav="hub" type="button"><i class="fa-solid fa-arrow-left"></i> Mundur ke menu utama</button>
+              <span>Poin ronde ini: <strong id="bossRunScore">0</strong></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ HASIL ============ -->
+        <section id="view-results" class="view hidden">
+          <div class="card result">
+            <div class="result__top">
+              <div class="result__trophy pulse"><i class="fa-solid fa-award"></i></div>
+              <h2>HASIL EKSPEDISI BALOK</h2>
+              <p class="lead" id="resultLead"></p>
+              <div class="result__score">
+                <span>Skor keseluruhan</span>
+                <div id="resultScore">0/100</div>
+                <small id="resultPoints"></small>
+              </div>
+            </div>
+
+            <div class="stack" style="gap: 10px">
+              <h4 class="panel-title"><i class="fa-solid fa-list-check" style="color: var(--primary)"></i> Analisis penguasaan materi</h4>
+              <div id="compList" class="stack" style="gap: 8px"></div>
+            </div>
+
+            <div class="note-box">
+              <h5><i class="fa-solid fa-comment-dots" style="color: var(--primary)"></i> Catatan Tutor Cerdas</h5>
+              <p id="resultNote"></p>
+            </div>
+
+            <div class="result__actions">
+              <button class="btn btn--primary btn--lg" data-nav="hub" type="button">Kembali ke Peta Misi</button>
+              <button class="btn btn--ghost btn--lg" data-action="replayBoss" type="button">
+                <i class="fa-solid fa-rotate-right"></i> Main Boss Lagi
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <strong>MISI BALOK</strong> — Media pembelajaran matematika interaktif SMP kelas VIII · dirancang untuk pemahaman visual &amp; konseptual
+      </footer>
+
+      <!-- Tutor AI -->
+      <button id="tutorFab" class="tutor-fab" data-action="toggleTutor" type="button">
+        <i class="fa-solid fa-robot"></i><span>Tanya Tutor</span>
+      </button>
+      <div id="tutorPanel" class="tutor hidden" role="dialog" aria-label="Tutor AI Balok">
+        <div class="tutor__head">
+          <div class="tutor__title">
+            <span class="tutor__ava"><i class="fa-solid fa-robot"></i></span>
+            <div><b>Tutor Balok</b><span id="tutorMode" class="tutor__mode">Siap membantu</span></div>
+          </div>
+          <div style="display: flex; gap: 6px">
+            <button class="icon-btn" data-action="tutorClear" title="Percakapan baru" type="button"><i class="fa-solid fa-broom"></i></button>
+            <button class="icon-btn" data-action="toggleTutor" title="Tutup" type="button"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+        <div id="tutorLog" class="tutor__log" aria-live="polite"></div>
+        <div id="tutorChips" class="tutor__chips"></div>
+        <form id="tutorForm" class="tutor__form">
+          <textarea id="tutorInput" rows="1" maxlength="600" placeholder="Tanya apa saja tentang balok..."></textarea>
+          <button class="btn btn--primary" type="submit" aria-label="Kirim"><i class="fa-solid fa-paper-plane"></i></button>
+        </form>
+      </div>
+    </div>
+
+    <div id="toastHost" class="toast-host" aria-live="polite"></div>
+
+    <!-- Pustaka -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Logika aplikasi (urutan penting) -->
+    <script src="js/config.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/three-scenes.js"></script>
+    <script src="js/missions.js"></script>
+    <script src="js/boss.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/tutor.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
